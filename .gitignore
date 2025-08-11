@@ -1,0 +1,60 @@
+# Android Studio
+*.iml
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Audio files (too large for git)
+*.mp3
+*.wav
+*.flac
+*.m4a
+
+# Temporary files
+temp_*/
+*.tmp
+*.temp
+
+# Logs
+*.log
+failed_downloads.txt
+
+# Google OAuth tokens (sensitive)
+token.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+*.swp
+*.swo
+*~
+
+# Build artifacts
+*.apk
+*.aab
