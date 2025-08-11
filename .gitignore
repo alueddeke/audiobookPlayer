@@ -15,6 +15,10 @@
 .cxx
 local.properties
 
+# Google OAuth credentials (sensitive)
+client_secret.json
+token.json
+
 # Python
 __pycache__/
 *.py[cod]
@@ -41,9 +45,6 @@ temp_*/
 # Logs
 *.log
 failed_downloads.txt
-
-# Google OAuth tokens (sensitive)
-token.json
 
 # OS files
 .DS_Store
