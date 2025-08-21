@@ -21,7 +21,7 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = file("../../audiobookplayer.keystore")
+            storeFile = file("../../../audiobookplayer.keystore")
             storePassword = "audiobook123"
             keyAlias = "audiobookplayer"
             keyPassword = "audiobook123"

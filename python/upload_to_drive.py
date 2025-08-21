@@ -37,10 +37,10 @@ def authenticate_google_drive():
                 creds = None
         
         if not creds:
-            if not os.path.exists('client_secret.json'):
-                raise FileNotFoundError("Client secret file not found: client_secret.json")
+            if not os.path.exists('../client_secret.json'):
+                raise FileNotFoundError("Client secret file not found: ../client_secret.json")
             
-            flow = InstalledAppFlow.from_client_secrets_file('client_secret.json', SCOPES)
+            flow = InstalledAppFlow.from_client_secrets_file('../client_secret.json', SCOPES)
             creds = flow.run_local_server(port=0, prompt='consent')
         
         # Save credentials

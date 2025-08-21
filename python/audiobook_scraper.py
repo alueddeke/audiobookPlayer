@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 SCOPES = ['https://www.googleapis.com/auth/drive.file']
 
 class AudiobookScraper:
-    def __init__(self, client_secret_path='AndroidApp2/app/client_secret.json'):
+    def __init__(self, client_secret_path='../client_secret.json'):
         self.client_secret_path = client_secret_path
         self.drive_service = None
         self.failed_downloads = []
@@ -627,7 +627,7 @@ def main():
     parser = argparse.ArgumentParser(description="Audiobook Scraper and Processor")
     parser.add_argument("url", help="URL of the audiobook page")
     parser.add_argument("--dry-run", action="store_true", help="Show what would be downloaded without actually doing it")
-    parser.add_argument("--client-secret", default="AndroidApp2/app/client_secret.json", 
+    parser.add_argument("--client-secret", default="../client_secret.json", 
                        help="Path to Google OAuth client secret file")
     
     args = parser.parse_args()

@@ -12,7 +12,7 @@ def check_client_secret():
     """Check if client_secret.json exists and is valid."""
     print("🔍 Checking client_secret.json...")
     
-    client_secret_path = "AndroidApp2/app/client_secret.json"
+    client_secret_path = "../client_secret.json"
     
     if not os.path.exists(client_secret_path):
         print("❌ client_secret.json not found!")
@@ -49,9 +49,9 @@ def check_required_files():
     print("\n📁 Checking required files...")
     
     required_files = [
-        "AndroidApp2/app/client_secret.json",
+        "../client_secret.json",
         "audiobook_scraper.py",
-        "test_google_drive.py",
+        "../tests/test_google_drive.py",
         "requirements.txt"
     ]
     
@@ -137,10 +137,10 @@ def provide_setup_instructions():
    
 6. DOWNLOAD UPDATED CREDENTIALS:
    - Download new client_secret.json
-   - Replace AndroidApp2/app/client_secret.json
+   - Replace ../client_secret.json
    
 7. TEST AGAIN:
-   python test_google_drive.py
+   python ../tests/test_google_drive.py
 """)
 
 def main():
