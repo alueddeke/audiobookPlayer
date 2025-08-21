@@ -146,6 +146,9 @@ class MainActivity : AppCompatActivity() {
         playerView = findViewById(R.id.player_view)
         statusText = findViewById(R.id.statusText)
         bookInfoText = findViewById(R.id.bookInfoText)
+        
+        // Set initial button state
+        playButton.text = "Play"
     }
 
     private fun setupGoogleSignIn() {
@@ -471,11 +474,32 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateBookDisplay() {
         if (availableBooks.isNotEmpty()) {
-            val bookNames = availableBooks.joinToString("\n") { it.name }
+            val bookNames = availableBooks.joinToString("\n") { "📚 ${it.name} (Tap to play)" }
             bookInfoText.text = "Available Books:\n$bookNames"
+            
+            // Make the text clickable
+            bookInfoText.setOnClickListener {
+                if (availableBooks.isNotEmpty()) {
+                    // Select the first book for now (can be enhanced to show a picker)
+                    selectBook(availableBooks[0])
+                }
+            }
+            bookInfoText.isClickable = true
+            bookInfoText.isFocusable = true
         } else {
             bookInfoText.text = "No books found"
+            bookInfoText.setOnClickListener(null)
+            bookInfoText.isClickable = false
+            bookInfoText.isFocusable = false
         }
+    }
+    
+    private fun selectBook(book: BookInfo) {
+        currentBook = book
+        currentSegmentIndex = 0
+        playCurrentSegment()
+        statusText.text = "Selected: ${book.name}"
+        updateBookInfo()
     }
 
     private suspend fun tryResumeFromLastPosition() {
@@ -622,7 +646,7 @@ class MainActivity : AppCompatActivity() {
 
         return try {
             val token = withContext(Dispatchers.IO) {
-                GoogleAuthUtil.getToken(this@MainActivity, account.account, scopes)
+                GoogleAuthUtil.getToken(this@MainActivity, account.account!!, scopes)
             }
 
             cachedAccessToken = token
@@ -644,13 +668,23 @@ class MainActivity : AppCompatActivity() {
             stopPositionTracking()
             Log.d(TAG, "Player paused")
         } else {
-            if (player.playbackState == Player.STATE_ENDED) {
-                player.seekTo(0)
-            }
             if (player.mediaItemCount == 0) {
                 Log.d(TAG, "No media item set, playing current segment")
-                playCurrentSegment()
+                if (currentBook != null) {
+                    playCurrentSegment()
+                } else {
+                    // If no book is selected, try to select the first available book
+                    if (availableBooks.isNotEmpty()) {
+                        selectBook(availableBooks[0])
+                    } else {
+                        Toast.makeText(this, "No book selected. Please refresh library first.", Toast.LENGTH_SHORT).show()
+                        return
+                    }
+                }
             } else {
+                if (player.playbackState == Player.STATE_ENDED) {
+                    player.seekTo(0)
+                }
                 player.play()
             }
             playButton.text = "Pause"

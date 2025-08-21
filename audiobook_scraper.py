@@ -67,7 +67,7 @@ class AudiobookScraper:
                     raise FileNotFoundError(f"Client secret file not found: {self.client_secret_path}")
                 
                 flow = InstalledAppFlow.from_client_secrets_file(self.client_secret_path, SCOPES)
-                creds = flow.run_local_server(port=0)
+                creds = flow.run_local_server(port=0, prompt='consent')
             
             # Save credentials
             with open('token.json', 'w') as token:
@@ -77,44 +77,146 @@ class AudiobookScraper:
         logger.info("✅ Successfully authenticated with Google Drive")
         
     def scrape_audio_urls(self, url):
-        """Scrape audio file URLs from a web page."""
+        """Scrape audio file URLs from a web page, handling pagination."""
         logger.info(f"🔍 Scraping audio URLs from: {url}")
         
-        try:
-            response = requests.get(url, timeout=30)
-            response.raise_for_status()
-            soup = BeautifulSoup(response.content, 'html.parser')
+        all_audio_urls = []
+        base_url = url.rstrip('/')
+        page_num = 1
+        max_pages = 20  # Safety limit to prevent infinite loops
+        
+        while page_num <= max_pages:
+            # Construct page URL
+            if page_num == 1:
+                page_url = base_url
+            else:
+                page_url = f"{base_url}/{page_num}/"
             
-            # Find all audio elements
-            audio_elements = soup.find_all('audio')
-            audio_urls = []
+            logger.info(f"🔍 Scraping page {page_num}: {page_url}")
             
-            for audio in audio_elements:
-                src = audio.get('src')
-                if src and 'ipaudio.club' in src:
-                    audio_urls.append(src)
-                    logger.info(f"Found audio URL: {src}")
-            
-            if not audio_urls:
-                logger.warning("No audio URLs found on the page")
-                return [], None
-            
-            # Extract book title from first URL
-            if audio_urls:
-                first_url = audio_urls[0]
-                # Extract book title from URL path
-                match = re.search(r'/([^/]+)/\d+\.mp3', first_url)
-                if match:
-                    book_title = unquote(match.group(1))
-                    logger.info(f"📚 Detected book title: {book_title}")
+            try:
+                response = requests.get(page_url, timeout=30)
+                response.raise_for_status()
+                soup = BeautifulSoup(response.content, 'html.parser')
+                
+                page_audio_urls = []
+                
+                # Method 1: Look for MediaElement.js audio players (primary method)
+                logger.info(f"🔍 Looking for MediaElement.js audio players on page {page_num}...")
+                
+                # Find all divs with class containing 'mejs-container' (MediaElement.js containers)
+                mejs_containers = soup.find_all('div', class_=lambda x: x and 'mejs-container' in x)
+                logger.info(f"Found {len(mejs_containers)} MediaElement.js containers on page {page_num}")
+                
+                for container in mejs_containers:
+                    # Look for mediaelementwrapper divs within the container
+                    media_wrappers = container.find_all('div', id=lambda x: x and 'mediaelementwrapper' in x)
+                    
+                    for wrapper in media_wrappers:
+                        # Find audio tags within the wrapper
+                        audio_tags = wrapper.find_all('audio')
+                        
+                        for audio in audio_tags:
+                            src = audio.get('src')
+                            if src and 'ipaudio.club' in src:
+                                page_audio_urls.append(src)
+                                logger.info(f"Found MediaElement audio URL on page {page_num}: {src}")
+                
+                # Method 2: Look for direct audio tags (fallback)
+                if not page_audio_urls:
+                    logger.info(f"🔍 Looking for direct audio tags on page {page_num}...")
+                    audio_elements = soup.find_all('audio')
+                    
+                    for audio in audio_elements:
+                        src = audio.get('src')
+                        if src and 'ipaudio.club' in src:
+                            page_audio_urls.append(src)
+                            logger.info(f"Found direct audio URL on page {page_num}: {src}")
+                
+                # Method 3: Look for any element with ipaudio.club URLs (broad search)
+                if not page_audio_urls:
+                    logger.info(f"🔍 Performing broad search for ipaudio.club URLs on page {page_num}...")
+                    
+                    # Find all elements that might contain the audio URLs
+                    all_elements = soup.find_all(['div', 'span', 'audio', 'source'])
+                    
+                    for element in all_elements:
+                        # Check src attribute
+                        src = element.get('src')
+                        if src and 'ipaudio.club' in src:
+                            page_audio_urls.append(src)
+                            logger.info(f"Found URL in element on page {page_num}: {src}")
+                        
+                        # Check data attributes
+                        for attr_name, attr_value in element.attrs.items():
+                            if isinstance(attr_value, str) and 'ipaudio.club' in attr_value:
+                                # Extract URL from attribute value
+                                import re
+                                urls = re.findall(r'https://ipaudio\.club[^\s"\'<>]+', attr_value)
+                                for url in urls:
+                                    if url not in page_audio_urls:
+                                        page_audio_urls.append(url)
+                                        logger.info(f"Found URL in {attr_name} attribute on page {page_num}: {url}")
+                
+                # If no audio URLs found on this page, we've reached the end
+                if not page_audio_urls:
+                    logger.info(f"📄 No audio URLs found on page {page_num}. Reached end of audiobook.")
+                    break
+                
+                # Add URLs from this page to the total collection
+                all_audio_urls.extend(page_audio_urls)
+                logger.info(f"✅ Found {len(page_audio_urls)} audio URLs on page {page_num}")
+                
+                # Check if there's a next page link
+                next_page_found = False
+                page_links = soup.find_all('a', href=True)
+                for link in page_links:
+                    href = link.get('href')
+                    if href and f"/{page_num + 1}/" in href:
+                        next_page_found = True
+                        break
+                
+                if not next_page_found:
+                    logger.info(f"📄 No next page link found. Assuming page {page_num} is the last page.")
+                    break
+                
+                page_num += 1
+                
+            except requests.exceptions.HTTPError as e:
+                if e.response.status_code == 404:
+                    logger.info(f"📄 Page {page_num} returned 404. Reached end of audiobook.")
+                    break
                 else:
-                    book_title = "Unknown Book"
-            
-            return audio_urls, book_title
-            
-        except Exception as e:
-            logger.error(f"❌ Error scraping URLs: {e}")
+                    logger.error(f"❌ HTTP error on page {page_num}: {e}")
+                    break
+            except Exception as e:
+                logger.error(f"❌ Error scraping page {page_num}: {e}")
+                break
+        
+        if not all_audio_urls:
+            logger.warning("No audio URLs found on any page")
             return [], None
+        
+        # Remove duplicates while preserving order
+        unique_urls = []
+        for url in all_audio_urls:
+            if url not in unique_urls:
+                unique_urls.append(url)
+        
+        logger.info(f"✅ Found {len(unique_urls)} unique audio URLs across {page_num - 1} pages")
+        
+        # Extract book title from first URL
+        if unique_urls:
+            first_url = unique_urls[0]
+            # Extract book title from URL path
+            match = re.search(r'/([^/]+)/\d+\.mp3', first_url)
+            if match:
+                book_title = unquote(match.group(1))
+                logger.info(f"📚 Detected book title: {book_title}")
+            else:
+                book_title = "Unknown Book"
+        
+        return unique_urls, book_title
     
     def download_file(self, url, filename, max_retries=3):
         """Download a file with retry logic."""
@@ -156,6 +258,44 @@ class AudiobookScraper:
             logger.warning(f"Could not get duration for {filepath}: {e}")
             return None
     
+    def analyze_audio_files(self, downloaded_files):
+        """Analyze downloaded audio files to determine if combining is needed."""
+        if not downloaded_files:
+            return False, "No files to analyze"
+        
+        total_duration = 0
+        total_size = 0
+        sample_count = min(3, len(downloaded_files))  # Check first 3 files
+        
+        logger.info(f"🔍 Analyzing {sample_count} sample files...")
+        
+        for i in range(sample_count):
+            try:
+                audio = AudioSegment.from_mp3(downloaded_files[i])
+                duration_minutes = len(audio) / 1000 / 60
+                size_mb = len(audio.raw_data) / 1024 / 1024
+                
+                total_duration += duration_minutes
+                total_size += size_mb
+                
+                logger.info(f"  File {i+1}: {duration_minutes:.1f} minutes, {size_mb:.1f} MB")
+                
+            except Exception as e:
+                logger.warning(f"Could not analyze {downloaded_files[i]}: {e}")
+        
+        avg_duration = total_duration / sample_count
+        avg_size = total_size / sample_count
+        
+        logger.info(f"📊 Average: {avg_duration:.1f} minutes, {avg_size:.1f} MB per file")
+        
+        # If files are already 60+ minutes or 150MB+, no need to combine
+        if avg_duration >= 60 or avg_size >= 150:
+            logger.info("✅ Files are already optimal size - skipping combination")
+            return False, f"Files average {avg_duration:.1f} minutes, {avg_size:.1f} MB"
+        else:
+            logger.info("📦 Files are small - combining recommended")
+            return True, f"Files average {avg_duration:.1f} minutes, {avg_size:.1f} MB"
+    
     def combine_audio_files(self, input_files, output_file, target_duration_minutes=60, max_size_mb=150):
         """Combine audio files into segments based on duration and size."""
         logger.info(f"🔧 Combining {len(input_files)} files into segments")
@@ -164,12 +304,14 @@ class AudiobookScraper:
         current_segment = 1
         segment_files = []
         segment_info = []
+        files_in_current_segment = []
         
         for i, file in enumerate(input_files):
             try:
                 logger.info(f"Adding {file} to segment {current_segment}")
                 audio = AudioSegment.from_mp3(file)
                 combined += audio
+                files_in_current_segment.append(file.split('_')[-1].replace('.mp3', ''))
                 
                 # Check if we should create a new segment
                 duration_minutes = len(combined) / 1000 / 60
@@ -204,11 +346,12 @@ class AudiobookScraper:
                         "file": segment_filename,
                         "duration_minutes": round(final_duration, 2),
                         "size_mb": round(final_size, 2),
-                        "original_files": [f.split('_')[-1].replace('.mp3', '') for f in input_files[max(0, i-len(combined)/len(audio)):i+1]]
+                        "original_files": files_in_current_segment.copy()
                     })
                     
                     # Start new segment
                     combined = AudioSegment.empty()
+                    files_in_current_segment = []
                     current_segment += 1
                     
             except Exception as e:
@@ -221,13 +364,14 @@ class AudiobookScraper:
         
         return segment_files, segment_info
     
-    def create_table_of_contents(self, book_title, segment_info):
+    def create_table_of_contents(self, book_title, segment_info, was_combined=False):
         """Create table of contents JSON file."""
         toc = {
             "book_title": book_title,
             "created_date": datetime.now().isoformat(),
             "total_segments": len(segment_info),
-            "segments": segment_info
+            "segments": segment_info,
+            "processing_note": "Files were combined into larger segments" if was_combined else "Files used directly as segments (no combination needed)"
         }
         
         toc_filename = f"{book_title.lower().replace(' ', '_')}_toc.json"
@@ -359,18 +503,56 @@ class AudiobookScraper:
             
             self.download_stats['total_files'] = len(audio_urls)
             
-            # Step 3: Combine files into segments
+            # Step 3: Analyze files and prepare for upload
             if downloaded_files:
-                output_base = book_title.lower().replace(' ', '_')
-                segment_files, segment_info = self.combine_audio_files(
-                    downloaded_files, 
-                    output_base,
-                    target_duration_minutes=60,
-                    max_size_mb=150
-                )
+                # Analyze files to determine if combining is needed
+                should_combine, analysis_msg = self.analyze_audio_files(downloaded_files)
+                
+                if should_combine:
+                    # Combine audio files into segments
+                    logger.info("📦 Combining files into optimal segments...")
+                    output_base = book_title.lower().replace(' ', '_')
+                    segment_files, segment_info = self.combine_audio_files(
+                        downloaded_files, 
+                        output_base,
+                        target_duration_minutes=60,
+                        max_size_mb=150
+                    )
+                else:
+                    # Use original files as segments - prepare them for upload
+                    logger.info("📁 Files are already optimal size - preparing for upload...")
+                    segment_files = []
+                    segment_info = []
+                    
+                    for i, file in enumerate(downloaded_files):
+                        try:
+                            audio = AudioSegment.from_mp3(file)
+                            duration_minutes = len(audio) / 1000 / 60
+                            size_mb = len(audio.raw_data) / 1024 / 1024
+                            
+                            # Create a copy with a better name for upload
+                            segment_filename = f"{book_title.lower().replace(' ', '_')}_segment_{i+1:02d}.mp3"
+                            
+                            logger.info(f"Preparing segment {i+1}: {duration_minutes:.1f} minutes, {size_mb:.1f} MB")
+                            
+                            # Copy file with new name
+                            import shutil
+                            shutil.copy2(file, segment_filename)
+                            
+                            segment_files.append(segment_filename)
+                            segment_info.append({
+                                "segment": i + 1,
+                                "file": segment_filename,
+                                "duration_minutes": round(duration_minutes, 2),
+                                "size_mb": round(size_mb, 2),
+                                "original_files": [file.split('_')[-1].replace('.mp3', '')]
+                            })
+                            
+                        except Exception as e:
+                            logger.error(f"❌ Error preparing {file}: {e}")
                 
                 # Step 4: Create table of contents
-                toc_file = self.create_table_of_contents(book_title, segment_info)
+                toc_file = self.create_table_of_contents(book_title, segment_info, was_combined=should_combine)
                 
                 # Step 5: Upload to Google Drive
                 if self.drive_service:

@@ -1,0 +1,242 @@
+{
+  "book_title": "Well Of Ascension",
+  "created_date": "2025-08-21T10:16:05.501998",
+  "total_segments": 26,
+  "segments": [
+    {
+      "segment": 1,
+      "file": "well_of_ascension_segment_01.mp3",
+      "duration_minutes": 71.97,
+      "size_mb": 363.25,
+      "original_files": [
+        "01"
+      ]
+    },
+    {
+      "segment": 2,
+      "file": "well_of_ascension_segment_02.mp3",
+      "duration_minutes": 72.09,
+      "size_mb": 363.81,
+      "original_files": [
+        "02"
+      ]
+    },
+    {
+      "segment": 3,
+      "file": "well_of_ascension_segment_03.mp3",
+      "duration_minutes": 72.14,
+      "size_mb": 364.08,
+      "original_files": [
+        "03"
+      ]
+    },
+    {
+      "segment": 4,
+      "file": "well_of_ascension_segment_04.mp3",
+      "duration_minutes": 72.03,
+      "size_mb": 363.53,
+      "original_files": [
+        "04"
+      ]
+    },
+    {
+      "segment": 5,
+      "file": "well_of_ascension_segment_05.mp3",
+      "duration_minutes": 72.09,
+      "size_mb": 363.82,
+      "original_files": [
+        "05"
+      ]
+    },
+    {
+      "segment": 6,
+      "file": "well_of_ascension_segment_06.mp3",
+      "duration_minutes": 72.03,
+      "size_mb": 363.5,
+      "original_files": [
+        "06"
+      ]
+    },
+    {
+      "segment": 7,
+      "file": "well_of_ascension_segment_07.mp3",
+      "duration_minutes": 16.75,
+      "size_mb": 84.54,
+      "original_files": [
+        "07"
+      ]
+    },
+    {
+      "segment": 8,
+      "file": "well_of_ascension_segment_08.mp3",
+      "duration_minutes": 72.02,
+      "size_mb": 363.48,
+      "original_files": [
+        "08"
+      ]
+    },
+    {
+      "segment": 9,
+      "file": "well_of_ascension_segment_09.mp3",
+      "duration_minutes": 72.11,
+      "size_mb": 363.92,
+      "original_files": [
+        "09"
+      ]
+    },
+    {
+      "segment": 10,
+      "file": "well_of_ascension_segment_10.mp3",
+      "duration_minutes": 72.11,
+      "size_mb": 363.91,
+      "original_files": [
+        "10"
+      ]
+    },
+    {
+      "segment": 11,
+      "file": "well_of_ascension_segment_11.mp3",
+      "duration_minutes": 72.09,
+      "size_mb": 363.82,
+      "original_files": [
+        "11"
+      ]
+    },
+    {
+      "segment": 12,
+      "file": "well_of_ascension_segment_12.mp3",
+      "duration_minutes": 72.08,
+      "size_mb": 363.79,
+      "original_files": [
+        "12"
+      ]
+    },
+    {
+      "segment": 13,
+      "file": "well_of_ascension_segment_13.mp3",
+      "duration_minutes": 72.05,
+      "size_mb": 363.64,
+      "original_files": [
+        "13"
+      ]
+    },
+    {
+      "segment": 14,
+      "file": "well_of_ascension_segment_14.mp3",
+      "duration_minutes": 30.15,
+      "size_mb": 152.15,
+      "original_files": [
+        "14"
+      ]
+    },
+    {
+      "segment": 15,
+      "file": "well_of_ascension_segment_15.mp3",
+      "duration_minutes": 71.9,
+      "size_mb": 362.87,
+      "original_files": [
+        "15"
+      ]
+    },
+    {
+      "segment": 16,
+      "file": "well_of_ascension_segment_16.mp3",
+      "duration_minutes": 72.03,
+      "size_mb": 363.52,
+      "original_files": [
+        "16"
+      ]
+    },
+    {
+      "segment": 17,
+      "file": "well_of_ascension_segment_17.mp3",
+      "duration_minutes": 72.07,
+      "size_mb": 363.73,
+      "original_files": [
+        "17"
+      ]
+    },
+    {
+      "segment": 18,
+      "file": "well_of_ascension_segment_18.mp3",
+      "duration_minutes": 72.33,
+      "size_mb": 365.05,
+      "original_files": [
+        "18"
+      ]
+    },
+    {
+      "segment": 19,
+      "file": "well_of_ascension_segment_19.mp3",
+      "duration_minutes": 72.03,
+      "size_mb": 363.51,
+      "original_files": [
+        "19"
+      ]
+    },
+    {
+      "segment": 20,
+      "file": "well_of_ascension_segment_20.mp3",
+      "duration_minutes": 72.1,
+      "size_mb": 363.89,
+      "original_files": [
+        "20"
+      ]
+    },
+    {
+      "segment": 21,
+      "file": "well_of_ascension_segment_21.mp3",
+      "duration_minutes": 33.91,
+      "size_mb": 171.15,
+      "original_files": [
+        "21"
+      ]
+    },
+    {
+      "segment": 22,
+      "file": "well_of_ascension_segment_22.mp3",
+      "duration_minutes": 71.81,
+      "size_mb": 362.4,
+      "original_files": [
+        "22"
+      ]
+    },
+    {
+      "segment": 23,
+      "file": "well_of_ascension_segment_23.mp3",
+      "duration_minutes": 72.05,
+      "size_mb": 363.65,
+      "original_files": [
+        "23"
+      ]
+    },
+    {
+      "segment": 24,
+      "file": "well_of_ascension_segment_24.mp3",
+      "duration_minutes": 72.05,
+      "size_mb": 363.63,
+      "original_files": [
+        "24"
+      ]
+    },
+    {
+      "segment": 25,
+      "file": "well_of_ascension_segment_25.mp3",
+      "duration_minutes": 72.21,
+      "size_mb": 364.41,
+      "original_files": [
+        "25"
+      ]
+    },
+    {
+      "segment": 26,
+      "file": "well_of_ascension_segment_26.mp3",
+      "duration_minutes": 71.03,
+      "size_mb": 358.49,
+      "original_files": [
+        "26"
+      ]
+    }
+  ],
+  "processing_note": "Files used directly as segments (no combination needed)"
+}
