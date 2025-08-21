@@ -1,258 +1,313 @@
-# AudioBook Player 2
+# AudioBook Player - Complete Audiobook Management System
 
-A cross-platform audiobook player application with Google Drive integration and advanced playback controls.
+A comprehensive audiobook management system that scrapes audiobooks from web sources, processes them into optimal segments, uploads to Google Drive, and provides a feature-rich Android player with position memory and speed control.
 
-## 📱 Features
+## 🎯 Overview
+
+This system provides a complete workflow from audiobook discovery to playback:
+
+1. **Web Scraping**: Automatically finds and downloads audiobook files from supported websites
+2. **Smart Processing**: Analyzes files and either combines small segments or uses files directly based on size/duration
+3. **Google Drive Integration**: Uploads processed audiobooks to organized folder structure
+4. **Android Player**: Feature-rich mobile app with position memory, speed control, and library management
+
+## 🚀 Features
+
+### Python Scraper & Processor
+- **Intelligent URL Scraping**: Handles pagination and multiple audio file formats
+- **Smart File Analysis**: Automatically determines if files need combining based on size/duration
+- **Optimized Processing**: Creates 60-120 minute segments with 150MB size limits
+- **Google Drive Upload**: Batch uploads with progress tracking and organized folder structure
+- **Table of Contents**: Generates metadata files for each audiobook
 
 ### Android App
-- **Google Drive Integration**: Stream audiobooks directly from your Google Drive
-- **Advanced Playback Controls**: Play/pause, next/previous track, skip forward/backward (30 seconds)
-- **Playback Speed Control**: Adjustable speed from 0.5x to 2.0x
-- **Google Sign-In Authentication**: Secure access to your Google Drive files
-- **Professional Media Player**: Built with ExoPlayer for robust audio playback
+- **Google Sign-In**: Secure authentication with Google Drive access
+- **Dynamic Library**: Automatically discovers and loads audiobooks from Drive
+- **Position Memory**: Remembers exact playback position across app restarts
+- **Precise Speed Control**: 0.05x increments (1.15x, 1.20x, 1.25x, etc.)
+- **Segment Navigation**: Easy previous/next segment controls
+- **Error Recovery**: Automatic retry and skip functionality for failed segments
+- **Offline Capable**: Works independently once installed
 
-### Python Utilities
-- **Audio Downloader**: Download and combine MP3 files from web sources
-- **Local Server**: Serve audiobook files locally for testing
-- **Audio Processing**: Combine multiple audio files into larger segments
-
-## 🏗️ Project Structure
+## 📁 Project Structure
 
 ```
 AudioBookPlayer2/
-├── AndroidApp2/                 # Android application
+├── audiobook_scraper.py          # Main scraper and processor
+├── upload_to_drive.py            # Standalone upload utility
+├── requirements.txt              # Python dependencies
+├── client_secret.json            # Google OAuth credentials (Desktop)
+├── token.json                    # OAuth tokens (auto-generated)
+├── audiobookplayer.keystore      # Android app signing key
+├── AndroidApp2/                  # Android application
 │   ├── app/
 │   │   ├── src/main/
 │   │   │   ├── java/com/antonilueddeke/androidapp2/
-│   │   │   │   └── MainActivity.kt    # Main Android app logic
-│   │   │   └── res/layout/
-│   │   │       └── activity_main.xml  # App UI layout
-│   │   └── build.gradle.kts           # Android build configuration
+│   │   │   │   └── MainActivity.kt    # Main app logic
+│   │   │   ├── res/layout/
+│   │   │   │   └── activity_main.xml  # UI layout
+│   │   │   └── AndroidManifest.xml    # App configuration
+│   │   ├── client_secret.json         # Google OAuth credentials (Android)
+│   │   └── build.gradle.kts           # Build configuration
 │   └── build.gradle.kts
-├── python_scripts/              # Python utilities
-│   ├── downloader.py            # Audio download and processing script
-│   ├── server.py                # Local HTTP server
-│   └── audio_*.mp3              # Individual audio segments
-├── audiobook_server/            # Combined audio files
-│   └── combined_audio_part*.mp3 # Large audio segments
-└── venv/                        # Python virtual environment
+├── GOOGLE_SETUP_GUIDE.md         # OAuth configuration guide
+├── diagnose_google_config.py     # OAuth troubleshooting tool
+└── README.md                     # This file
 ```
 
-## 🚀 Quick Start
+## 🛠️ Installation & Setup
 
 ### Prerequisites
+- Python 3.8+
+- Android Studio / Android SDK
+- Google Cloud Project with OAuth configured
+- Google Drive account
 
-#### For Android App
-- Android Studio (latest version)
-- Android device or emulator (API level 24+)
-- Google account with Google Drive access
+### Python Dependencies
+```bash
+pip install -r requirements.txt
+```
 
-#### For Python Scripts
-- Python 3.7+
-- FFmpeg installed on your system
-- Required Python packages (see setup below)
+### Google OAuth Setup
+1. **Create Google Cloud Project** (if not exists)
+2. **Enable APIs**: Google Drive API, Google+ API
+3. **Configure OAuth Consent Screen**:
+   - User Type: External
+   - Scopes: `drive.readonly`, `drive.file`
+   - Test Users: Add your email
+4. **Create OAuth Clients**:
+   - **Desktop Application**: For Python scraper
+   - **Android Application**: For Android app
+5. **Download credentials**:
+   - Desktop: `client_secret.json` (for Python)
+   - Android: `client_secret.json` (for Android app)
 
-### Setup Instructions
-
-#### 1. Android App Setup
-
-1. **Clone the repository**
+### Android App Setup
+1. **Configure signing** (already done):
    ```bash
-   git clone <repository-url>
-   cd AudioBookPlayer2
+   # Keystore created with:
+   keytool -genkey -v -keystore audiobookplayer.keystore -alias audiobookplayer -keyalg RSA -keysize 2048 -validity 10000
    ```
 
-2. **Open in Android Studio**
-   - Open Android Studio
-   - Select "Open an existing project"
-   - Navigate to `AndroidApp2/` folder and open it
+2. **Add SHA-1 fingerprints** to Google Cloud Console:
+   - **Release SHA-1**: `E7:DF:E9:5D:81:77:F0:74:04:DB:05:7C:F9:9E:5A:5E:B1:84:F3:03`
+   - **Package name**: `com.antonilueddeke.androidapp2`
 
-3. **Configure Google Sign-In**
-   - The app uses Google Sign-In for Drive access
-   - No additional configuration needed for basic functionality
-
-4. **Build and Run**
-   - Connect an Android device or start an emulator
-   - Click "Run" in Android Studio
-   - The app will install and launch on your device
-
-#### 2. Python Scripts Setup
-
-1. **Install FFmpeg**
+3. **Build and install**:
    ```bash
-   # macOS
-   brew install ffmpeg
-   
-   # Ubuntu/Debian
-   sudo apt update
-   sudo apt install ffmpeg
-   
-   # Windows
-   # Download from https://ffmpeg.org/download.html
+   cd AndroidApp2
+   ./gradlew assembleRelease
+   # APK: app/build/outputs/apk/release/app-release.apk
    ```
 
-2. **Setup Python environment**
-   ```bash
-   cd AudioBookPlayer2
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   pip install requests pydub
-   ```
+## 📖 Usage
 
-## 📖 Usage Guide
+### 1. Scraping and Processing Audiobooks
 
-### Android App Usage
+#### Basic Usage
+```bash
+python audiobook_scraper.py "https://cafeaudiobooks.net/book-url/"
+```
 
-1. **Launch the App**
-   - Open the AudioBook Player 2 app on your Android device
+#### Dry Run (Test Only)
+```bash
+python audiobook_scraper.py "https://cafeaudiobooks.net/book-url/" --dry-run
+```
 
-2. **Sign In**
-   - Tap "Sign in with Google"
-   - Grant necessary permissions for Google Drive access
+#### Standalone Upload (if files already prepared)
+```bash
+python upload_to_drive.py
+```
 
-3. **Play Audio**
-   - The app automatically loads audiobook files from Google Drive
-   - Use the playback controls:
-     - **Play/Pause**: Start or pause playback
-     - **Previous/Next**: Navigate between audio files
-     - **Skip Forward/Backward**: Jump 30 seconds ahead or back
-     - **Speed Slider**: Adjust playback speed (0.5x - 2.0x)
+### 2. Android App Usage
 
-### Python Scripts Usage
+#### Installation
+1. **Install APK**: `AudioBookPlayer-Signed.apk`
+2. **Sign in with Google**: Grant Drive access permissions
+3. **Refresh Library**: Tap "Refresh Library" button
+4. **Select Book**: Tap book title to select
+5. **Start Playing**: Tap "Play" button
 
-#### Download and Process Audio Files
+#### Features
+- **Speed Control**: Use slider for 0.05x increments
+- **Position Memory**: App remembers position across restarts
+- **Segment Navigation**: Previous/Next buttons
+- **Error Recovery**: Automatic retry and skip on failures
 
-1. **Download audio files**
-   ```bash
-   cd python_scripts
-   python downloader.py
-   ```
-   This will download MP3 files from the configured URL and combine them.
+## 🔄 Complete Workflow
 
-2. **Combine existing files only**
-   ```bash
-   python downloader.py --combine-only
-   ```
+### Step 1: Audiobook Discovery
+```bash
+# Scrape audiobook URLs from website
+python audiobook_scraper.py "https://cafeaudiobooks.net/brandon-sanderson-the-well-of-ascension-audiobook/"
+```
 
-#### Serve Audio Files Locally
+**What happens:**
+- Scrapes all pages for audio URLs
+- Downloads 26 audio files (~72 minutes each)
+- Analyzes file sizes and durations
+- Determines no combining needed (files already optimal)
 
-1. **Start the local server**
-   ```bash
-   python server.py
-   ```
-   The server will start on `http://localhost:8000`
+### Step 2: Processing
+**Smart Analysis:**
+- Files: ~72 minutes, ~364MB each
+- Decision: Use files directly (no combining)
+- Creates properly named segments
+- Generates table of contents
 
-2. **Access files**
-   - Open your web browser
-   - Navigate to `http://localhost:8000`
-   - Browse and download audio files
+### Step 3: Google Drive Upload
+**Folder Structure Created:**
+```
+audiobooks/
+└── Well Of Ascension/
+    ├── well_of_ascension_segment_01.mp3
+    ├── well_of_ascension_segment_02.mp3
+    ├── ...
+    ├── well_of_ascension_segment_26.mp3
+    └── well_of_ascension_toc.json
+```
 
-## 🔧 Configuration
+### Step 4: Android Playback
+1. **Sign in** with Google account
+2. **Refresh library** to discover books
+3. **Select book** by tapping title
+4. **Start playback** with full controls
 
-### Android App Configuration
+## 🔧 Technical Details
 
-The app is pre-configured with:
-- **Google Drive API**: Read-only access to Drive files
-- **Audio File IDs**: Hardcoded Google Drive file IDs for specific audiobooks
-- **Playback Settings**: Default skip duration (30 seconds), speed range (0.5x-2.0x)
+### Python Scraper Architecture
+- **URL Scraping**: Handles pagination, multiple file formats
+- **File Analysis**: Automatic size/duration assessment
+- **Smart Processing**: Combines only when necessary
+- **Drive Integration**: OAuth2 authentication, batch uploads
+- **Error Handling**: Retry logic, failure logging
 
-### Python Scripts Configuration
+### Android App Architecture
+- **Google Sign-In**: OAuth2 with Drive scope
+- **ExoPlayer**: Audio playback engine
+- **SharedPreferences**: Position and settings persistence
+- **Coroutines**: Asynchronous operations
+- **Material Design**: Modern UI components
 
-#### downloader.py Configuration
-- **Base URL**: Configured for specific audiobook source
-- **File Format**: Supports numbered MP3 files (audio_00.mp3, audio_01.mp3, etc.)
-- **Output**: Combines files into 1GB segments to avoid file size limits
+### Key Data Structures
+```kotlin
+data class BookInfo(
+    val id: String,
+    val name: String,
+    val segments: List<SegmentInfo>
+)
 
-#### server.py Configuration
-- **Port**: Default port 8000
-- **Directory**: Serves files from `audiobook_server/` directory
+data class SegmentInfo(
+    val fileId: String,
+    val name: String,
+    val duration: Long,
+    val size: Long
+)
+```
 
-## 🛠️ Development
-
-### Android Development
-
-- **Language**: Kotlin
-- **Minimum SDK**: 24 (Android 7.0)
-- **Target SDK**: 34 (Android 14)
-- **Key Dependencies**:
-  - ExoPlayer for media playback
-  - Google Sign-In API
-  - Google Drive API
-  - Material Design components
-
-### Python Development
-
-- **Dependencies**: `requests`, `pydub`
-- **Audio Processing**: Uses FFmpeg for audio manipulation
-- **File Management**: Downloads, combines, and serves audio files
-
-## 📁 File Organization
-
-### Audio Files
-- **Individual segments**: `python_scripts/audio_*.mp3`
-- **Combined parts**: `audiobook_server/combined_audio_part*.mp3`
-- **Total size**: Multiple GB of audiobook content
-
-### Source Code
-- **Android**: Complete Android application with UI and business logic
-- **Python**: Utility scripts for audio processing and serving
-
-## 🔒 Security & Permissions
-
-### Android Permissions
-- **Internet**: Required for Google Drive access and audio streaming
-- **Storage**: Required for temporary file caching
-- **Google Sign-In**: Required for Drive authentication
-
-### Google API Access
-- **Drive API**: Read-only access to user's Google Drive
-- **OAuth 2.0**: Secure authentication flow
-- **Token Management**: Automatic token refresh and caching
+### Persistence
+- **Last Book ID**: `KEY_LAST_BOOK_ID`
+- **Last Segment**: `KEY_LAST_SEGMENT_INDEX`
+- **Last Position**: `KEY_LAST_POSITION`
+- **Last Speed**: `KEY_LAST_SPEED`
 
 ## 🐛 Troubleshooting
 
 ### Common Issues
 
-1. **Google Sign-In fails**
-   - Ensure Google Play Services is installed and updated
-   - Check internet connection
-   - Verify Google account has Drive access
+#### Google Sign-In Error 10
+**Cause**: SHA-1 fingerprint mismatch
+**Solution**: Add release SHA-1 to Google Cloud Console OAuth client
 
-2. **Audio playback issues**
-   - Check internet connection for streaming
-   - Verify Google Drive file permissions
-   - Ensure audio files are in supported format (MP3)
+#### "Package appears to be invalid"
+**Cause**: Unsigned APK
+**Solution**: Use `AudioBookPlayer-Signed.apk` (properly signed)
 
-3. **Python script errors**
-   - Verify FFmpeg is installed and in PATH
-   - Check Python dependencies are installed
-   - Ensure sufficient disk space for audio processing
+#### "No books found"
+**Cause**: Library not refreshed or Drive access issues
+**Solution**: 
+1. Ensure signed in with Google
+2. Tap "Refresh Library"
+3. Check Drive permissions
 
-### Debug Information
+#### Scraper Analysis Issues
+**Cause**: Files already optimal size
+**Solution**: This is normal - files are used directly without combining
 
-The Android app includes comprehensive logging:
-- Check Android Studio Logcat for detailed error messages
-- Look for tags: "MainActivity", "ExoPlayer", "Google Sign-In"
+### Debug Tools
+- **OAuth Diagnosis**: `python diagnose_google_config.py`
+- **Drive Test**: `python test_google_drive.py`
+- **Analysis Test**: `python test_analysis.py`
+
+## 📱 App Features Deep Dive
+
+### Position Memory System
+- **Saves every 5 seconds** during playback
+- **Persists across app restarts**
+- **Auto-resumes** at exact position
+- **Handles segment boundaries**
+
+### Speed Control
+- **Range**: 0.5x to 2.0x
+- **Increments**: 0.05x (1.15x, 1.20x, 1.25x)
+- **Persistent**: Remembers last used speed
+- **Real-time**: Changes apply immediately
+
+### Error Recovery
+- **Automatic retry**: Failed segments retry once
+- **Skip on failure**: Moves to next segment if retry fails
+- **User notification**: Clear error messages
+- **Graceful degradation**: Continues playback
+
+### Library Management
+- **Dynamic discovery**: Scans Drive for new books
+- **Automatic updates**: Refresh button updates library
+- **Book selection**: Tap to select and prepare
+- **Segment navigation**: Easy previous/next controls
+
+## 🔒 Security & Permissions
+
+### Required Permissions
+- **Internet**: Drive access and audio streaming
+- **Storage**: Local file caching
+- **Google Sign-In**: OAuth2 authentication
+
+### OAuth Scopes
+- **Drive Read-Only**: `https://www.googleapis.com/auth/drive.readonly`
+- **Drive File**: `https://www.googleapis.com/auth/drive.file`
+
+### Data Privacy
+- **No data collection**: App doesn't send data to external servers
+- **Local storage**: All preferences stored locally
+- **Google Drive**: Only accesses user's own Drive files
+
+## 🚀 Future Enhancements
+
+### Potential Improvements
+- **Multiple source support**: Add more audiobook websites
+- **Offline caching**: Download segments for offline use
+- **Playlist support**: Create custom playlists
+- **Cloud sync**: Sync preferences across devices
+- **Advanced filtering**: Search and filter library
+- **Background playback**: Continue playing when app minimized
+
+### Technical Improvements
+- **Modern ExoPlayer**: Update to latest version
+- **Jetpack Compose**: Modern UI framework
+- **Dependency injection**: Better architecture
+- **Unit tests**: Comprehensive testing
+- **CI/CD**: Automated builds and deployment
 
 ## 📄 License
 
-This project is for educational and personal use. Please respect copyright laws when downloading and using audio content.
+This project is for personal use and educational purposes. Please respect copyright laws and only download content you have permission to access.
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
-## 📞 Support
-
-For issues and questions:
-1. Check the troubleshooting section above
-2. Review Android Studio logs for error details
-3. Ensure all prerequisites are properly installed
+This is a personal project, but suggestions and improvements are welcome. The codebase is designed to be extensible and well-documented for future development.
 
 ---
 
-**Note**: This project is designed for personal use and educational purposes. Ensure you have proper rights to any audio content you download or stream. 
+**Last Updated**: August 21, 2025  
+**Status**: MVP Complete - Fully Functional  
+**Version**: 1.0 (Signed Release) 
